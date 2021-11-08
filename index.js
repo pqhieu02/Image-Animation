@@ -3,27 +3,19 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const TEXT_INITAL_X = 0;
-const TEXT_SIZE = 50;
-const TEXT_INITAL_Y = TEXT_SIZE;
-
-var text = "Ball Blast";
-ctx.font = `${TEXT_SIZE}px Arial`;
-ctx.fillStyle = "red";
-ctx.fillText(text, TEXT_INITAL_X, TEXT_INITAL_Y);
-
-const CONTENT_WIDTH = ctx.measureText(text).width;
 const MOUSE_RADIUS = 100;
 
-const PARTICLE_DEFAULT_RADIUS = 2;
+const PARTICLE_DEFAULT_RADIUS = 1;
 const PARTICLE_DEFAULT_COLOR = "white";
 const PARTILE_RETURN_BASE_LOCATION_SPEED = 0.1;
-const DISTANCE_BETWEEN_PARTICLE_FACTOR = 5;
+const DISTANCE_BETWEEN_PARTICLE_FACTOR = 1;
 
 const PARTICLE_POSITION_ADJUSTMENT_X =
-    canvas.width / 2 - (CONTENT_WIDTH / 2) * DISTANCE_BETWEEN_PARTICLE_FACTOR;
+    (canvas.width / 2) * DISTANCE_BETWEEN_PARTICLE_FACTOR;
 const PARTICLE_POSITION_ADJUSTMENT_Y =
-    canvas.height / 2 - TEXT_SIZE * DISTANCE_BETWEEN_PARTICLE_FACTOR;
+    (canvas.height / 2) * DISTANCE_BETWEEN_PARTICLE_FACTOR;
+// const PARTICLE_POSITION_ADJUSTMENT_X = 0;
+// const PARTICLE_POSITION_ADJUSTMENT_Y = 0;
 const INPUT_IMAGE_WIDTH = canvas.width;
 const INPUT_IMAGE_HEIGHT = canvas.height;
 
@@ -32,13 +24,6 @@ var mouse = {
     y: 0,
 };
 var particles = [];
-
-var inputCoordinate = ctx.getImageData(
-    0,
-    0,
-    INPUT_IMAGE_WIDTH,
-    INPUT_IMAGE_WIDTH
-);
 
 class Particle {
     constructor(x, y, color, radius) {
@@ -122,25 +107,33 @@ function loop() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     particles.forEach((particle) => {
         particle.update();
+    });
+    particles.forEach((particle) => {
         particle.render();
     });
+    // console.time("a");
+    // console.timeEnd("a");
     requestAnimationFrame(loop);
 }
 
-function readImageInput() {
+function readImageInput(inputCoordinate) {
     let array = [];
     for (let i = 0; i < inputCoordinate.width; i++)
         for (let j = 0; j < inputCoordinate.height; j++) {
-            let x = 4 * i + 4 * j * inputCoordinate.height + 3;
-            let opacity = inputCoordinate.data[x];
+            let x = 4 * i + 4 * j * inputCoordinate.height;
+            let red = inputCoordinate.data[x];
+            let green = inputCoordinate.data[x + 1];
+            let blue = inputCoordinate.data[x + 2];
+            let opacity = inputCoordinate.data[x + 3];
             if (opacity > 255 / 2) {
+                let color = `rgba(${red}, ${green}, ${blue}, ${opacity})`;
                 array.push(
                     new Particle(
                         i * DISTANCE_BETWEEN_PARTICLE_FACTOR +
                             PARTICLE_POSITION_ADJUSTMENT_X,
                         j * DISTANCE_BETWEEN_PARTICLE_FACTOR +
                             PARTICLE_POSITION_ADJUSTMENT_Y,
-                        PARTICLE_DEFAULT_COLOR,
+                        color,
                         PARTICLE_DEFAULT_RADIUS
                     )
                 );
@@ -150,7 +143,6 @@ function readImageInput() {
 }
 
 function init() {
-    particles = readImageInput();
     window.addEventListener("mousemove", (e) => {
         mouse.x = e.clientX;
         mouse.y = e.clientY;
@@ -160,7 +152,16 @@ function init() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
     });
-    loop();
 }
 
-init();
+let image = new Image();
+image.src = "spiderman.png";
+
+image.onload = () => {
+    init();
+    ctx.drawImage(image, 0, 0);
+    console.log(image.width, image.height);
+    let data = ctx.getImageData(0, 0, 500, 500); // ???
+    particles = readImageInput(data);
+    loop();
+};
