@@ -16,17 +16,17 @@ const DISTANCE_BETWEEN_PARTICLE_FACTOR = 1;
 //     (canvas.height / 2) * DISTANCE_BETWEEN_PARTICLE_FACTOR;
 const PARTICLE_POSITION_ADJUSTMENT_X = 0;
 const PARTICLE_POSITION_ADJUSTMENT_Y = 0;
-// const INPUT_IMAGE_WIDTH = canvas.width;
-// const INPUT_IMAGE_HEIGHT = canvas.height;
-const INPUT_IMAGE_WIDTH = 20;
-const INPUT_IMAGE_HEIGHT = 30;
+const INPUT_IMAGE_WIDTH = canvas.width;
+const INPUT_IMAGE_HEIGHT = canvas.height;
+// const INPUT_IMAGE_WIDTH = 20;
+// const INPUT_IMAGE_HEIGHT = 30;
 
 var mouse = {
-    x: null,
-    y: null,
+    x: -canvas.width,
+    y: -canvas.height,
 };
 var particles = [];
-var imageData;
+var output = ctx.createImageData(canvas.width, canvas.height);
 
 class Particle {
     constructor(x, y, color, colorObject, radius) {
@@ -109,8 +109,10 @@ class Particle {
     }
 
     render() {
+        console.log();
         ctx.beginPath();
         ctx.fillStyle = this.color;
+        console.log(this.radius);
         ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
         ctx.fill();
     }
@@ -119,57 +121,52 @@ class Particle {
 function updateImageData(particle) {
     let radius = particle.radius;
 
-    let startPreX = particle.preX - radius;
-    let endPreX = particle.preX + radius;
-    let startPreY = particle.preY - radius;
-    let endPreY = particle.preY + radius;
+    let startPreX = Math.max(0, Math.floor(particle.preX - radius));
+    let endPreX = Math.min(canvas.width, Math.floor(particle.preX + radius));
+    let startPreY = Math.max(0, Math.floor(particle.preY - radius));
+    let endPreY = Math.min(canvas.height, Math.floor(particle.preY + radius));
 
     for (let x = startPreX; x < endPreX; x++)
         for (let y = startPreY; y < endPreY; y++) {
             let location = 4 * x + 4 * y * canvas.width;
-            imageData.data[location] = 0;
-            imageData.data[location + 1] = 0;
-            imageData.data[location + 2] = 0;
-            imageData.data[location + 3] = particle.opacity;
+            output.data[location] = 0;
+            output.data[location + 1] = 0;
+            output.data[location + 2] = 255;
+            output.data[location + 3] = 0;
         }
 
-    let startX = particle.x - radius;
-    let endX = particle.x + radius;
-    let startY = particle.y - radius;
-    let endY = particle.y + radius;
+    let startX = Math.max(0, Math.floor(particle.x - radius));
+    let endX = Math.min(canvas.width, Math.floor(particle.x + radius));
+    let startY = Math.max(0, Math.floor(particle.y - radius));
+    let endY = Math.min(canvas.height, Math.floor(particle.y + radius));
 
     for (let x = startX; x < endX; x++)
         for (let y = startY; y < endY; y++) {
             let location = 4 * x + 4 * y * canvas.width;
-            imageData.data[location] = particle.red;
-            imageData.data[location + 1] = particle.blue;
-            imageData.data[location + 2] = particle.green;
-            // imageData.data[location] = 255;
-            // imageData.data[location + 1] = 255;
-            // imageData.data[location + 2] = 255;
-            imageData.data[location + 3] = particle.opacity;
+            output.data[location] = particle.red;
+            output.data[location + 1] = particle.blue;
+            output.data[location + 2] = particle.green;
+            // output.data[location] = 255;
+            // output.data[location + 1] = 255;
+            // output.data[location + 2] = 255;
+            output.data[location + 3] = particle.opacity;
         }
 }
 
 function loop() {
-    // ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // console.time("a");
+    // console.timeEnd("a");
     ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
     particles.forEach((particle) => {
         particle.update();
-    });
-
-    // console.time("a");
-    particles.forEach((particle) => {
         updateImageData(particle);
     });
-    // console.timeEnd("a");
-
-    ctx.putImageData(imageData, 0, 0);
+    ctx.putImageData(output, 0, 0);
     // particles.forEach((particle) => {
     //     particle.render();
     // });
+
     requestAnimationFrame(loop);
 }
 
@@ -181,8 +178,12 @@ function readImageInput(inputData) {
             let red = inputData.data[x];
             let green = inputData.data[x + 1];
             let blue = inputData.data[x + 2];
+            // let red = 255;
+            // let green = 255;
+            // let blue = 255;
             let opacity = inputData.data[x + 3];
             if (opacity > 255 / 2) {
+                if (red === 0 && green === 0 && blue === 0) continue;
                 let color = `rgba(${red}, ${green}, ${blue}, ${opacity})`;
                 let colorObject = {
                     red: red,
@@ -203,11 +204,19 @@ function readImageInput(inputData) {
                 updateImageData(particle);
             }
         }
+    // for (let i = 0; i < 1; i++) {
+    //     let colorObject = {
+    //         red: 255,
+    //         green: 0,
+    //         blue: 0,
+    //         opacity: 255,
+    //     };
+    //     array.push(new Particle(100, 100, "red", colorObject, 10));
+    // }
     return array;
 }
 
 function init() {
-    imageData = ctx.createImageData(canvas.width, canvas.height);
     window.addEventListener("mousemove", (e) => {
         mouse.x = e.clientX;
         mouse.y = e.clientY;
@@ -220,19 +229,17 @@ function init() {
 }
 
 let image = new Image();
-image.src = "spiderman.png";
+image.src = "image.png";
 
 image.onload = () => {
     init();
-    ctx.drawImage(image, 0, 0);
+    ctx.drawImage(image, canvas.width / 2, canvas.height / 2);
     let inputData = ctx.getImageData(
         0,
         0,
         INPUT_IMAGE_WIDTH,
         INPUT_IMAGE_HEIGHT
     );
-    // imageData = inputData;
     particles = readImageInput(inputData);
-    console.log(particles.length);
     loop();
 };
