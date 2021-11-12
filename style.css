@@ -4,8 +4,11 @@
     height: 100%;
 }
 
+#container {
+    display: flexbox;
+    justify-content: center;
+}
+
 #canvas {
     background-color: black;
-    width: 100%;
-    height: 100%;
 }
