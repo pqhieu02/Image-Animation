@@ -42,6 +42,7 @@ class Particle {
         this.blue = colorObject.blue;
         this.opacity = colorObject.opacity;
 
+        this.mass = Math.random() * (50 - 10) + 10;
         this.baseX = x;
         this.baseY = y;
         this.distance;
@@ -70,14 +71,14 @@ class Particle {
         };
 
         this.distance = getDistance(this.x, this.y, mouse.x, mouse.y);
-        // if (this.distance === MOUSE_RADIUS) return;
+        if (this.distance === MOUSE_RADIUS) return;
         this.preX = this.x;
         this.preY = this.y;
         if (this.distance < MOUSE_RADIUS) {
             let speed = getSpeed(mouse.x, mouse.y, this.x, this.y);
 
-            this.x += speed.x * 50;
-            this.y += speed.y * 50;
+            this.x += speed.x * this.mass;
+            this.y += speed.y * this.mass;
         }
         if (this.distance > MOUSE_RADIUS) {
             let limitX =
@@ -131,8 +132,8 @@ function updateImageData(particle) {
             let location = 4 * x + 4 * y * canvas.width;
             output.data[location] = 0;
             output.data[location + 1] = 0;
-            output.data[location + 2] = 255;
-            output.data[location + 3] = 0;
+            output.data[location + 2] = 0;
+            output.data[location + 3] = 255;
         }
 
     let startX = Math.max(0, Math.floor(particle.x - radius));
@@ -146,16 +147,13 @@ function updateImageData(particle) {
             output.data[location] = particle.red;
             output.data[location + 1] = particle.blue;
             output.data[location + 2] = particle.green;
-            // output.data[location] = 255;
-            // output.data[location + 1] = 255;
-            // output.data[location + 2] = 255;
             output.data[location + 3] = particle.opacity;
         }
 }
 
 function loop() {
     // console.time("a");
-    // console.timeEnd("a");
+    // console.timeEnd("a");+
     ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     particles.forEach((particle) => {
@@ -163,9 +161,6 @@ function loop() {
         updateImageData(particle);
     });
     ctx.putImageData(output, 0, 0);
-    // particles.forEach((particle) => {
-    //     particle.render();
-    // });
 
     requestAnimationFrame(loop);
 }
@@ -178,9 +173,6 @@ function readImageInput(inputData) {
             let red = inputData.data[x];
             let green = inputData.data[x + 1];
             let blue = inputData.data[x + 2];
-            // let red = 255;
-            // let green = 255;
-            // let blue = 255;
             let opacity = inputData.data[x + 3];
             if (opacity > 255 / 2) {
                 if (red === 0 && green === 0 && blue === 0) continue;
@@ -204,15 +196,6 @@ function readImageInput(inputData) {
                 updateImageData(particle);
             }
         }
-    // for (let i = 0; i < 1; i++) {
-    //     let colorObject = {
-    //         red: 255,
-    //         green: 0,
-    //         blue: 0,
-    //         opacity: 255,
-    //     };
-    //     array.push(new Particle(100, 100, "red", colorObject, 10));
-    // }
     return array;
 }
 
@@ -233,7 +216,7 @@ image.src = "image.png";
 
 image.onload = () => {
     init();
-    ctx.drawImage(image, canvas.width / 2, canvas.height / 2);
+    ctx.drawImage(image, canvas.width / 2 - image.width / 2, canvas.height / 2 - image.height / 2);
     let inputData = ctx.getImageData(
         0,
         0,
