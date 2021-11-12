@@ -1,6 +1,6 @@
 const PARTICLE_DEFAULT_RADIUS = 1;
 const PARTILE_RETURN_BASE_LOCATION_SPEED = 0.1;
-const PARTICLE_MINIMUM_MASS = 5;
+const PARTICLE_MINIMUM_MASS = 10;
 const PARTICLE_MAXIMUM_MASS = 50;
 
 var canvas = document.getElementById("canvas");
@@ -16,8 +16,8 @@ var mouse = {
 };
 var particles = [];
 
-var image = new Image(100, 100);
-image.src = "spiderman.png";
+var image = new Image();
+image.src = "image.png";
 
 var output;
 
