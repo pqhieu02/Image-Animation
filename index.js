@@ -17,7 +17,7 @@ var mouse = {
 var particles = [];
 
 var image = new Image();
-image.src = "image.png";
+// image.src = "image.png";
 
 var output;
 
@@ -204,7 +204,6 @@ function main() {
     loop();
 }
 
-console.log(canvas.width, canvas.height);
 canvas.addEventListener("mousemove", (e) => {
     mouse.x = e.clientX;
     mouse.y = e.clientY;
@@ -217,11 +216,16 @@ canvas.addEventListener("resize", () => {
     main();
 });
 
-function createImageAnimation(elementId, img) {
-    canvas = document.getElementById("canvas");
-    ctx = canvas.getContext("2d");
-    image = img;
-}
 image.onload = () => {
     main();
+};
+
+inputFile.onchange = (event) => {
+    let file = event.target.files[0];
+    let reader = new FileReader();
+    reader.onloadend = () => {
+        image.src = reader.result;
+        document.getElementById("inputFile").style.display = "none";
+    };
+    reader.readAsDataURL(file);
 };

@@ -5,10 +5,17 @@
 }
 
 #container {
-    display: flexbox;
+    display: flex;
     justify-content: center;
+    align-items: center;
 }
 
 #canvas {
     background-color: black;
+}
+
+#inputFile {
+    position: absolute;
+    height: auto;
+    text-align: center;
 }
