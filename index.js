@@ -5,6 +5,7 @@ const PARTICLE_MAXIMUM_MASS = 50;
 
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
+var container = document.getElementById("container");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
@@ -17,7 +18,7 @@ var mouse = {
 var particles = [];
 
 var image = new Image();
-// image.src = "image.png";
+image.src = "spiderman.png";
 
 var output;
 
@@ -107,7 +108,6 @@ class Particle {
     render() {
         ctx.beginPath();
         ctx.fillStyle = this.color;
-        console.log(this.radius);
         ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
         ctx.fill();
     }
@@ -190,6 +190,8 @@ function readImageInput(imageData) {
 
 function init() {
     output = ctx.createImageData(canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles = [];
     ctx.drawImage(
         image,
         canvas.width / 2 - image.width / 2,
@@ -225,7 +227,12 @@ inputFile.onchange = (event) => {
     let reader = new FileReader();
     reader.onloadend = () => {
         image.src = reader.result;
-        document.getElementById("inputFile").style.display = "none";
     };
     reader.readAsDataURL(file);
 };
+
+container.onclick = () => {
+    inputFile.click();
+};
+
+// inputFile.click();

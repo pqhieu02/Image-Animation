@@ -1,13 +1,27 @@
 * {
     margin: 0px;
     padding: 0px;
-    height: 100%;
+    overflow: hidden;
+    color: black;
 }
 
-#container {
+#btn {
     display: flex;
     justify-content: center;
-    align-items: center;
+}
+
+#btn > div {
+    color: white;
+    position: absolute;
+    margin: 3vw;
+    padding: 1vw;
+    font-size: 2vw;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 50px;
+    border: 5px solid rgb(112, 80, 173);
+    background-color: rgb(112, 80, 173);
+    cursor: pointer;
 }
 
 #canvas {
@@ -15,7 +29,5 @@
 }
 
 #inputFile {
-    position: absolute;
-    height: auto;
-    text-align: center;
+    display: none;    
 }
